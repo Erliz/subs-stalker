@@ -1,6 +1,6 @@
 {
   "name": "subs-stalker",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Watch for video files and download subtitles",
   "main": "src/index.js",
   "scripts": {
@@ -23,7 +23,16 @@
   "dependencies": {
     "babel-core": "^6.5.2",
     "babel-preset-es2015": "^6.5.0",
+    "body-parser": "^1.15.0",
     "chokidar": "^1.4.2",
+    "commander": "^2.9.0",
+    "content-disposition": "^0.5.1",
+    "eventemitter2": "^0.4.14",
+    "express": "^4.13.4",
     "pushbullet": "^1.4.3"
+  },
+  "devDependencies": {
+    "mocha": "^2.4.5",
+    "superagent": "^1.7.2"
   }
 }
