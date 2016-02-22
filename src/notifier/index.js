@@ -1,5 +1,5 @@
 import PushBullet from 'pushbullet';
-const title = 'Subs-Stalker notifier';
+const title = 'Subs-Stalker: ';
 let notifier = () => { throw new Error('PushBullet error: Api key not set') };
 let devices = [];
 let messagesToSend = [];
@@ -29,8 +29,8 @@ function setApiKey(apiKey) {
     notifier = new PushBullet(apiKey);
 }
 
-function notify(message) {
-    messagesToSend.push(message);
+function notify(message, action='') {
+    messagesToSend.push({title: title + action, body: message});
 }
 
 function init(apiKey, devices) {
@@ -44,8 +44,8 @@ function sender() {
         let message = messagesToSend.pop();
         if (message) {
             devices.forEach((deviceId) => {
-                console.log(`send message ${message} to device id ${deviceId}`);
-                notifier.note(deviceId, title, message, function (error, response) {
+                console.log(`send message "${message.title}": "${message.body}" to device id ${deviceId}`);
+                notifier.note(deviceId, message.title, message.body, function (error, response) {
                     if (error) {
                         console.log(error);
                         messagesToSend.push(message)
@@ -57,4 +57,4 @@ function sender() {
     }, 10000);
 }
 
-export {init, notify};
+export default {init, notify};
