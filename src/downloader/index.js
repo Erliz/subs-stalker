@@ -40,6 +40,11 @@ function handleResponse(error, res, body) {
         console.log(`Request params: ${JSON.stringify(query)}`);
         console.log(`Request url: ${res.request.href}`);
         console.log(`Response: ${data.error}`);
+    } else {
+        // reproduced when no subs file in storage, but in db it exist
+        console.log(`Uncatched response status`);
+        console.log(res.body);
+        console.log(res.statusCode);
     }
 }
 
