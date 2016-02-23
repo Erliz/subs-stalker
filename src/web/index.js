@@ -39,7 +39,7 @@ function emit(eventName, event) {
 
 function run(ip = 'localhost', port = 3000) {
     http.listen(port, function () {
-        console.log('Example app listening on port 3000!');
+        console.log(`Stalker app listening on port ${port}!`);
     });
     console.log(`Subs-Stalker webhook listener running at http://${ip}:${port}/`);
 }
