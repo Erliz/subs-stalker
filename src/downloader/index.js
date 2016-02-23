@@ -25,7 +25,7 @@ function handleResponse(error, res, body) {
     if (res.statusCode == 200) {
         let fileName = contentDisposition.parse(res.headers['content-disposition']).parameters.filename;
         let path = getFilePathToWrite(this.to, query.season, fileName);
-        fs.writeFile(getFilePathToWrite(this.to, query.season, res.headers), path, (err) => {
+        fs.writeFile(path, body, (err) => {
             if (err) {
                 console.log(`Fail file write into path ${path}`);
                 console.log(err);
