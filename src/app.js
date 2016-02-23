@@ -31,7 +31,6 @@ function downloadHandler(event) {
         );
     });
 }
-eventEmitter.on('subs:test', downloadHandler);
 eventEmitter.on('subs:webhook:request', downloadHandler);
 
 // webhook module
