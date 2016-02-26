@@ -1,7 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-let http = express();
+const http = express();
 let eventEmitter;
+let logger = console;
+let server;
 
 http.use(bodyParser.json());
 http.use(bodyParser.urlencoded({ extended: true }));
@@ -12,36 +14,50 @@ http.post('/', function (req, res) {
         if (params.EventType) {
             switch (params.EventType) {
                 case 'Test':
-                    emit('subs:test', params);
+                    dispatch('subs:test', params);
                     break;
                 case 'Download':
                 case 'Rename':
-                    emit('subs:webhook:request', params);
+                    dispatch('subs:webhook:request', params);
                     break;
                 default:
-                    console.log('Webhook receive request with not mapped params:');
-                    console.log(params);
+                    logger.info('Webhook receive request with not mapped params:', params);
             }
         }
     }
     res.send('{data: "ok"}');
 });
 
-function setEventEmitter(emitter) {
+const setEventEmitter = (emitter) => {
     eventEmitter = emitter;
-}
+};
 
-function emit(eventName, event) {
+const setLogger = (log) => {
+    logger = log;
+};
+
+const dispatch = (eventName, event) => {
     if (eventEmitter) {
         eventEmitter.emit(eventName, event);
     }
-}
+};
 
-function run(ip = 'localhost', port = 3000) {
-    http.listen(port, function () {
-        console.log(`Stalker app listening on port ${port}!`);
+const run = (ip = 'localhost', port = 3000) => {
+    return new Promise((resolve) => {
+        server = http.listen(port, () => {
+            logger.info(`Subs-Stalker webhook listener running at http://${ip}:${port}/`);
+            resolve();
+        });
     });
-    console.log(`Subs-Stalker webhook listener running at http://${ip}:${port}/`);
-}
+};
 
-export default {run, setEventEmitter};
+const stop = () => {
+    return new Promise((resolve) => {
+        server.close(() => {
+            logger.info(`Subs-Stalker webhook listener stopped`);
+            resolve();
+        })
+    });
+};
+
+export default {run, stop, setEventEmitter, setLogger};

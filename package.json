@@ -29,7 +29,8 @@
     "content-disposition": "^0.5.1",
     "eventemitter2": "^0.4.14",
     "express": "^4.13.4",
-    "pushbullet": "^1.4.3"
+    "pushbullet": "^1.4.3",
+    "winston": "^2.2.0"
   },
   "devDependencies": {
     "mocha": "^2.4.5",
