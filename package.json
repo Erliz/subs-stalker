@@ -27,12 +27,13 @@
     "chokidar": "^1.4.2",
     "commander": "^2.9.0",
     "content-disposition": "^0.5.1",
-    "eventemitter2": "^0.4.14",
+    "eventemitter2": "^1.0.0",
     "express": "^4.13.4",
     "pushbullet": "^1.4.3",
     "winston": "^2.2.0"
   },
   "devDependencies": {
+    "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "superagent": "^1.7.2"
   }
