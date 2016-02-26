@@ -1,5 +1,6 @@
 import {Logger, transports} from 'winston';
 
+/* istanbul ignore next */
 export default (service = 'app', level = 'info') => {
     return new Logger({
         transports: [new (transports.Console)({
