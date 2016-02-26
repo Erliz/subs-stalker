@@ -1,10 +1,10 @@
 {
   "name": "subs-stalker",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Watch for video files and download subtitles",
   "main": "src/index.js",
   "scripts": {
-    "test": "test"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
