@@ -9,7 +9,7 @@ node_js:
   - "4.3.1"
   - "0.12"
 script:
-  - npm run test
+  - npm run test:single
   - npm run check-coverage
 after_success:
   - npm run report-coverage

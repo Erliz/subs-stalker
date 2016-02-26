@@ -15,6 +15,26 @@ describe('webhook server', function() {
     beforeEach(() => web.run(defaultHost, defaultPort));
     afterEach(() => web.stop());
 
+    it('should listen on default host and port', (done) => {
+        superagent
+            .post(defaultTestUrl)
+            .end(done);
+    });
+
+    it('should not listen when stop on default host and port', (done) => {
+        web.stop()
+            .then(() => {
+                superagent
+                    .post(defaultTestUrl)
+                    .end()
+                    .then(assert.fail, (err) => {
+                        if (err.code == 'ECONNREFUSED') {
+                            done()
+                        }
+                    });
+            })
+    });
+
     it('should response ok on test webhook', (done) => {
         let testQuery = {
             EventType: 'Test',

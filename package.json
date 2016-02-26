@@ -4,7 +4,8 @@
   "description": "Watch for video files and download subtitles",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register",
+    "test": "mocha --compilers js:babel-core/register -w",
+    "test:single": "mocha --compilers js:babel-core/register",
     "check-coverage": "babel-node node_modules/babel-istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha",
     "report-coverage": "cat ./coverage/lcov.info | codecov"
   },
@@ -39,6 +40,7 @@
     "babel-istanbul": "^0.6.0",
     "codecov": "^1.0.1",
     "mocha": "^2.4.5",
+    "sinon": "1.17.3",
     "superagent": "^1.7.2"
   }
 }
