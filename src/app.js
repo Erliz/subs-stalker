@@ -6,7 +6,8 @@ import input from './command';
 import web from './web';
 import eventEmitter from './event';
 import downloader from './downloader';
-import notifier from './notifier';
+import {Notifier, transports as notifierTransports} from './notifier';
+import PushBullet from 'pushbullet';
 //let args = parser.args();
 
 const API_VERSION = 'v0.1';
@@ -41,12 +42,18 @@ if (input.webhook) {
 
 // notify module
 if (input.notify) {
-    notifier.init(input.notifier_apikey, input.notifier_devices);
-    eventEmitter.on('subs:download', function(event) {
-        notifier.notify(event, 'Subtitle Downloaded');
+    let notifier = new Notifier(
+        [new notifierTransports.PushBulletTransport(new PushBullet(input.notifier_apikey), input.notifier_devices)],
+        'Subs-Stalker: '
+    );
+    eventEmitter.on('subs:download', function(fileName) {
+        notifier.notify({title: 'Subtitle Downloaded', body: fileName});
     });
     eventEmitter.on('subs:test', function(event) {
-        notifier.notify(`Series ${event.Series.Title} - Episode ${event.Episodes[0].EpisodeNumber}`, 'Webhook test');
+        notifier.notify({
+            title:'Webhook test',
+            body: `Series ${event.Series.Title} - Episode ${event.Episodes[0].EpisodeNumber}`
+        });
     });
 }
 

@@ -1,60 +1,35 @@
-import PushBullet from 'pushbullet';
-const title = 'Subs-Stalker: ';
-let notifier = () => { throw new Error('PushBullet error: Api key not set') };
-let devices = [];
-let messagesToSend = [];
+import transports from './transport';
 
-function handleDevicesResponse(devicesIdsToNotify, availableDevices) {
-    availableDevices.forEach((device) => {
-        if (!device.active) {
-            return;
+class Notifier {
+    constructor(transportList, title = '') {
+        this.transports = [];
+        transportList.forEach(transport => {
+            if (transport instanceof transports.TransportInterface) {
+                this.transports.push(transport);
+            } else {
+                throw new TypeError(transport + ' not implement TransportInterface');
+            }
+        });
+
+        this.title = title;
+
+    }
+
+    notify({title = '', body = ''}) {
+        let notifications = [];
+        this.transports.forEach((transport) => {
+            notifications.push(transport.send({
+                title: this.title + title,
+                body
+            }));
+        });
+
+        if (!notifications.length) {
+            notifications.push(Promise.resolve());
         }
-        if (devicesIdsToNotify.indexOf(device.iden) > -1) {
-            devices.push(device.iden);
-        }
-    });
+
+        return Promise.race(notifications);
+    }
 }
 
-function setDevices(devices) {
-    devices = Array.isArray(devices) ? devices : [devices];
-    notifier.devices((error, response) => {
-        if (error) {
-            throw error;
-        }
-        handleDevicesResponse(devices, response.devices);
-    });
-}
-
-function setApiKey(apiKey) {
-    notifier = new PushBullet(apiKey);
-}
-
-function notify(message, action='') {
-    messagesToSend.push({title: title + action, body: message});
-}
-
-function init(apiKey, devices) {
-    setApiKey(apiKey);
-    setDevices(devices);
-    sender();
-}
-
-function sender() {
-    setTimeout(() => {
-        let message = messagesToSend.pop();
-        if (message) {
-            devices.forEach((deviceId) => {
-                console.log(`send message "${message.title}": "${message.body}" to device id ${deviceId}`);
-                notifier.note(deviceId, message.title, message.body, function (error, response) {
-                    if (error) {
-                        console.log(error);
-                        messagesToSend.push(message)
-                    }
-                });
-            });
-        }
-        sender();
-    }, 10000);
-}
-
-export default {init, notify};
+export {Notifier, transports};
