@@ -35,27 +35,35 @@ describe('notifier', () => {
         describe('Interface', () => {
 
             it('should throw an error if call new', () => {
+                let isCaught = false;
                 try {
                     new notifierTransports.TransportInterface();
                 } catch (e) {
+                    isCaught = true;
                     expect(e).to.be.an.instanceof(TypeError).with.property('message').that.match(/abstract/);
                 }
+                expect(isCaught).to.be.true;
             });
 
             it('should throw an error if call `send`', () => {
+                let isCaught = false;
                 try {
                     class ExtendTransportInterface extends notifierTransports.TransportInterface {}
                     let extendedClass = new ExtendTransportInterface();
                     extendedClass.send();
                 } catch (e) {
+                    isCaught = true;
                     expect(e).to.be.an.instanceof(Error).with.property('message').that.match(/not implemented/);
                 }
+                expect(isCaught).to.be.true;
             });
+
         });
 
         describe('PushBullet', () => {
 
             it('should throw error if service argument is not an instance of PushBullet', () => {
+                let isCaught = false;
                 try {
                     new notifierTransports.PushBulletTransport(
                         {},
@@ -63,8 +71,10 @@ describe('notifier', () => {
                         logger
                     );
                 } catch (e) {
+                    isCaught = true;
                     expect(e).to.be.an.instanceof(TypeError).with.property('message').that.match(/PushBullet instance/);
                 }
+                expect(isCaught).to.be.true;
             });
 
             it('should create transport instance successfully', () => {
@@ -79,7 +89,7 @@ describe('notifier', () => {
                 let service = getMockedPushBulletInstance();
                 let transport = new notifierTransports.PushBulletTransport(
                     service,
-                    [],
+                    null,
                     logger
                 );
                 let promise = transport.send({title: '', body: ''});
@@ -97,10 +107,7 @@ describe('notifier', () => {
                     logger
                 );
                 transport.send({title: '', body: ''})
-                    .then((res, err) => {
-                        if (err) {
-                            done(err);
-                        }
+                    .then(() => {
                         expect(spy.called).to.be.true;
                         done();
                     })
@@ -111,8 +118,8 @@ describe('notifier', () => {
             });
 
             it('should execute `note` for each message on each device', (done) => {
-                let notifier = getMockedPushBulletInstance();
-                let spy = sinon.spy(notifier, 'note');
+                let service = getMockedPushBulletInstance();
+                let spy = sinon.spy(service, 'note');
                 let devices = ['1', '2'];
                 let messages = [
                     {title: 'first', body: 'first'},
@@ -120,7 +127,7 @@ describe('notifier', () => {
                     {title: 'third', body: 'third'}
                 ];
                 let transport = new notifierTransports.PushBulletTransport(
-                    notifier,
+                    service,
                     devices,
                     logger
                 );
@@ -129,14 +136,69 @@ describe('notifier', () => {
                     sendPromises.push(transport.send(message));
                 });
                 Promise.all(sendPromises)
-                    .then((res, err) => {
-                        expect(err).to.not.exist;
+                    .then(() => {
                         expect(spy.callCount).to.equal(messages.length * devices.length);
                         done();
                     })
                     .catch(err => {
                         done(err);
                     });
+            });
+
+            it('should call subscribers on construct', (done) => {
+                new notifierTransports.PushBulletTransport(
+                    getMockedPushBulletInstance(),
+                    null,
+                    logger,
+                    () => {
+                        done();
+                    }
+                );
+            });
+
+            it('should write to log error on `devices` reject', (done) => {
+                let service = getMockedPushBulletInstance();
+                let errorText = 'devices error response';
+                sinon.stub(service, 'devices', (cb) => {
+                    cb(errorText, null);
+                });
+                let loggerMock = sinon.mock(logger);
+                loggerMock.expects('error').once();
+                let transport = new notifierTransports.PushBulletTransport(
+                    service,
+                    null,
+                    logger,
+                    () => {
+                        loggerMock.restore();
+                        loggerMock.verify();
+                        done();
+                    }
+                );
+            });
+
+            it('should write to log error on `note` reject', (done) => {
+                let service = getMockedPushBulletInstance();
+                let errorText = 'devices error response';
+                sinon.stub(service, 'note', (deviceId, title, body, cb) => {
+                    cb(errorText, null);
+                });
+                let loggerMock = sinon.mock(logger);
+                loggerMock.expects('error').once();
+                let transport = new notifierTransports.PushBulletTransport(
+                    service,
+                    ['1'],
+                    logger
+                );
+                transport.send({})
+                    .catch(err => {
+                        loggerMock.restore();
+                        loggerMock.verify();
+                        expect(err).to.be.string(errorText);
+                        done();
+                    })
+                    .catch(err => {
+                        done(err);
+                    })
             });
 
         });
@@ -150,13 +212,25 @@ describe('notifier', () => {
         });
 
         it('should throw an error if get instance that not implement transport interface', () => {
+            let isCaught = false;
             try {
                 new Notifier([{}])
             } catch (e) {
+                isCaught = true;
                 expect(e).to.be.an.instanceof(TypeError).with.property('message').that.match(/not implement/);
             }
+            expect(isCaught).to.be.true;
         });
 
+    });
+
+    it('should return resolved promise without transports', (done) => {
+        let notifier = getMockedNotifier();
+        notifier.transports = [];
+        notifier.notify({})
+            .then(() =>{
+                done();
+            });
     });
 
     it('should send message to transport', (done) => {

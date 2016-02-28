@@ -1,6 +1,6 @@
 export default class Transport {
     constructor(service, devices, logger = console) {
-        if (!(this instanceof Transport)) {
+        if (this.constructor == Transport) {
             throw TypeError('Transport is an abstract class');
         }
         this.logger = logger;

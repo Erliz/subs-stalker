@@ -2,7 +2,7 @@ import TransportInterface from './interface';
 import PushBullet from 'pushbullet';
 
 export default class PushBulletTransport extends TransportInterface {
-    constructor(service, devices, logger) {
+    constructor(service, devices, logger, callback = () => {}) {
         if (!(service.constructor == PushBullet)) {
             throw new TypeError('Service for PushBulletTransport expects to be PushBullet instance');
         }
@@ -10,14 +10,13 @@ export default class PushBulletTransport extends TransportInterface {
         devices = Array.isArray(devices) ? devices : [devices];
 
         this.whenInitialize = this.getDevicesList()
-            .then((res, err)=>{
-                if (err) {
-                    this.logger.error(err);
-                }
+            .then(res => {
                 this.devices = this.getAvailableDevices(devices, res);
+                callback();
             })
             .catch(err => {
                 this.logger.error(err.message);
+                callback(null, err);
             });
     }
 
