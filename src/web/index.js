@@ -11,6 +11,7 @@ http.use(bodyParser.urlencoded({ extended: true }));
 http.post('/', function (req, res) {
     if (req.body) {
         let params = req.body;
+        logger.info('Receive: ' + JSON.stringify(params));
         if (params.EventType) {
             switch (params.EventType) {
                 case 'Test':
@@ -21,7 +22,7 @@ http.post('/', function (req, res) {
                     dispatch('subs:webhook:request', params);
                     break;
                 default:
-                    logger.info('Webhook receive request with not mapped params:', params);
+                    logger.error('Webhook receive request with not mapped params:', params);
             }
         }
     }

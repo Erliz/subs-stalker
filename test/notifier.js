@@ -1,4 +1,3 @@
-import assert from 'assert';
 import sinon from 'sinon';
 import {expect} from 'chai';
 

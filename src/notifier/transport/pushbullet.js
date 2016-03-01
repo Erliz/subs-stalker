@@ -1,7 +1,14 @@
 import TransportInterface from './interface';
 import PushBullet from 'pushbullet';
 
-export default class PushBulletTransport extends TransportInterface {
+export default class PushBulletTransport extends TransportInterface
+{
+    /**
+     * @param {PushBullet} service
+     * @param {String} devices
+     * @param logger
+     * @param {Function} callback
+     */
     constructor(service, devices, logger, callback = () => {}) {
         if (!(service.constructor == PushBullet)) {
             throw new TypeError('Service for PushBulletTransport expects to be PushBullet instance');
@@ -12,14 +19,20 @@ export default class PushBulletTransport extends TransportInterface {
         this.whenInitialize = this.getDevicesList()
             .then(res => {
                 this.devices = this.getAvailableDevices(devices, res);
-                callback();
+                callback(null, true);
             })
             .catch(err => {
                 this.logger.error(err.message);
-                callback(null, err);
+                callback(err);
             });
     }
 
+    /**
+     * @param sendToDevices
+     * @param {Array} devices
+     *
+     * @returns {Array}
+     */
     getAvailableDevices(sendToDevices, {devices = []}) {
         let availableDevices = [];
         devices.forEach((device) => {
@@ -31,6 +44,9 @@ export default class PushBulletTransport extends TransportInterface {
         return availableDevices;
     }
 
+    /**
+     * @returns {Promise}
+     */
     getDevicesList() {
         return new Promise((resolve, reject) => {
             this.service.devices((err, res) => {
@@ -42,6 +58,12 @@ export default class PushBulletTransport extends TransportInterface {
         });
     }
 
+    /**
+     * @param title
+     * @param body
+     *
+     * @returns {Promise}
+     */
     sendToDevices({title = '', body = ''}) {
         let notifications = [];
         this.devices.forEach((deviceId) => {
@@ -62,6 +84,10 @@ export default class PushBulletTransport extends TransportInterface {
         return Promise.race(notifications);
     }
 
+    /**
+     * @param message
+     * @returns {Promise}
+     */
     send(message) {
         return this.whenInitialize
             .then(() => this.sendToDevices(message))

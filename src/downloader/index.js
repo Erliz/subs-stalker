@@ -3,10 +3,12 @@ import querystring from 'querystring';
 import contentDisposition from 'content-disposition';
 import url from 'url';
 import fs from 'fs';
-let serviceUrl;
+let serviceUrl = '';
 let eventEmitter;
+let logger = console;
 
-function buildQuery(tvdbId, season, episodeNum, releaseGroup, videoFileName) {
+const buildQuery = (tvdbId, season, episodeNum, releaseGroup, videoFileName) => {
+    validateServiceUrl(serviceUrl);
     return serviceUrl + '?' +querystring.stringify({
         tvdbId,
         season,
@@ -14,55 +16,77 @@ function buildQuery(tvdbId, season, episodeNum, releaseGroup, videoFileName) {
         releaseGroup,
         videoFileName
     })
-}
+};
 
-function handleResponse(error, res, body) {
-    if (error) {
-        console.log(error);
+const validateServiceUrl = (url) => {
+    if (!url || !url.length) {
+        throw new Error('Downloader base url should be not empty');
     }
+};
 
-    let query = url.parse(res.request.path, true).query;
-    if (res.statusCode == 200) {
-        let fileName = contentDisposition.parse(res.headers['content-disposition']).parameters.filename;
-        let path = getFilePathToWrite(this.to, query.season, fileName);
-        fs.writeFile(path, body, (err) => {
-            if (err) {
-                console.log(`Fail file write into path ${path}`);
-                console.log(err);
+const getFilePathToWrite = (seriesDir, seasonNum, fileName) => {
+    return `${seriesDir.replace(/\/$/g, '')}/Season ${seasonNum}/${fileName}`;
+};
+
+const download = ({tvdbId, season = 1, episodeNum, releaseGroup, videoFileName}, baseFolder) => {
+    let query = buildQuery(tvdbId, season, episodeNum, releaseGroup, videoFileName);
+    request
+        .get(query)
+        .on('error', err => {handleErrorResponse(err, query)})
+        .on('response', res => {
+            // i don`t know why 40* and 50* code are getting here
+            if (res.statusCode === 200) {
+                let fileName = getFileNameFromResponse(res);
+                if (fileName) {
+                    res.pipe(writeFile(getFilePathToWrite(baseFolder, season, fileName)));
+                }
             } else {
-                console.log(`Success file write into path ${path}`);
-                eventEmitter.emit('subs:download', fileName);
+                handleErrorResponse(Object.assign(new Error(), res), query);
             }
         });
-    } else if (res.statusCode == 404) {
-        let data = JSON.parse(body);
-        console.log(`Downloader response status code ${res.statusCode}`);
-        console.log(`Request params: ${JSON.stringify(query)}`);
-        console.log(`Request url: ${res.request.href}`);
-        console.log(`Response: ${data.error}`);
-    } else {
-        // reproduced when no subs file in storage, but in db it exist
-        console.log(`Uncatched response status`);
-        console.log(res.body);
-        console.log(res.statusCode);
+};
+
+const getFileNameFromResponse = (res) => {
+    let header = res.headers['content-disposition'];
+    if (!header) {
+        let err = new Error('Response have no "content-disposition" in header');
+        logger.error(err.message);
+        dispatch('subs:download:error', err);
+        return;
     }
-}
+    return contentDisposition.parse(header).parameters.filename;
+};
 
-function getFilePathToWrite(seasonDir, seasonNum, fileName) {
-    return `${seasonDir}/Season ${seasonNum}/${fileName}`;
-}
+const handleErrorResponse = (err, query) => {
+    logger.error(`Response ${err.statusCode} with '${err.message}' on ${query}`);
+    dispatch('subs:download:error', err);
+};
 
-function download(tvdbId, season, episodeNum, releaseGroup, videoFileName, to) {
-    let query = buildQuery(tvdbId, season, episodeNum, releaseGroup, videoFileName);
-    request.get(query, {}, handleResponse.bind({to}));
-}
+const writeFile = (to) => {
+    return fs.createWriteStream(to)
+        .on('close', () => {
+            logger.info(`Download success: ${to}`);
+            dispatch('subs:download:success', to);
+        });
+};
 
-function setUrl(url) {
+const dispatch = (eventName, event) => {
+    if (eventEmitter) {
+        eventEmitter.emit(eventName, event);
+    }
+};
+
+const setUrl = (url) => {
+    validateServiceUrl(url);
     serviceUrl = url;
-}
+};
 
-function setEventEmitter(emitter) {
+const setEventEmitter = (emitter) => {
     eventEmitter = emitter;
-}
+};
 
-export default {setUrl, setEventEmitter, download}
+const setLogger = (log) => {
+    logger = log;
+};
+
+export default {setUrl, setEventEmitter, setLogger, download}
