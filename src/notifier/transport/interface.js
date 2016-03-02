@@ -1,16 +1,17 @@
 export default class Transport {
-    constructor(service, devices, logger = console) {
-        if (this.constructor == Transport) {
-            throw TypeError('Transport is an abstract class');
-        }
-        this.logger = logger;
-        this.service = service;
-
-        devices = Array.isArray(devices) ? devices : [devices];
-        this.devices = devices;
+  constructor(service, devices, logger = console) {
+    if (this.constructor == Transport) {
+      throw TypeError('Transport is an abstract class');
     }
 
-    send(title, message) {
-        throw new Error('Method not implemented');
-    }
+    this.logger = logger;
+    this.service = service;
+
+    devices = Array.isArray(devices) ? devices : [devices];
+    this.devices = devices;
+  }
+
+  send(title, message) {
+    throw new Error('Method not implemented');
+  }
 }

@@ -1,4 +1,4 @@
 import TransportInterface from './interface';
 import PushBulletTransport from './pushbullet';
 
-export default {TransportInterface, PushBulletTransport}
+export default { TransportInterface, PushBulletTransport };
