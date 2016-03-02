@@ -8,12 +8,21 @@ import fs from 'fs';
 import createLogger from './../src/logger';
 import downloader from './../src/downloader';
 import eventEmitter from './../src/event';
+import documents from './../src/documents';
 
-const emptyQuery = { tvdbId: '', season: 1, episodeNum: '', releaseGroup: '', videoFileName: '' };
+const emptyQuery = { tvdbId: 1, season: 1, episodeNum: 1, releaseGroup: '', videoFileName: '' };
 const defaultResponseText = 'Tone of text';
 const fakeServerDomain = 'http://test-subs-domain.com';
 const fakeServerUrl = '/api/1001/v1.0/';
 const fakeServerHeader = { 'Content-Disposition': 'attachment; filename="response_file.txt"' };
+
+const createDefaultEpisode = (additional) => {
+  return new documents.Episode(Object.assign({
+    tvdbId: 1,
+    episodeNum: 1,
+    seriesPath: '/tv/anime',
+  }, additional));
+};
 
 const setupFakeServer = ({
     code = 200,
@@ -49,7 +58,7 @@ describe('downloader', () => {
   describe('download', () => {
     it('should make request', (done) => {
       let fakeServer = setupFakeServer({});
-      downloader.download({}, '/tv/anime/');
+      downloader.download(createDefaultEpisode());
       eventEmitter.once('subs:download:success', () => {
         fakeServer.done();
         done();
@@ -58,9 +67,9 @@ describe('downloader', () => {
 
     it('should put received text to file', (done) => {
       let fakeServer = setupFakeServer({});
-      downloader.download({}, '/tv/anime/');
-      eventEmitter.once('subs:download:success', (filePath) => {
-        fs.readFile(filePath, (err, res) => {
+      downloader.download(createDefaultEpisode());
+      eventEmitter.once('subs:download:success', (episode) => {
+        fs.readFile(episode.subtitleFilePath, (err, res) => {
           if (err) {
             done(err);
           }
@@ -74,7 +83,7 @@ describe('downloader', () => {
 
     it('should dispatch error on 404', (done) => {
       let fakeServer = setupFakeServer({ code: 404 });
-      downloader.download({}, '/tv/anime/');
+      downloader.download(createDefaultEpisode());
       eventEmitter.once('subs:download:error', (err) => {
         expect(err).to.be.instanceof(Error).with.property('statusCode').to.be.equal(404);
         fakeServer.done();
@@ -84,7 +93,7 @@ describe('downloader', () => {
 
     it('should dispatch error on bad query', (done) => {
       let fakeServer = setupFakeServer({ query: {} });
-      downloader.download({}, '/tv/anime/');
+      downloader.download(createDefaultEpisode());
       eventEmitter.once('subs:download:error', (err) => {
         expect(err).to.be.instanceof(Error).with.property('statusCode').to.be.equal(404);
         done();
@@ -93,7 +102,7 @@ describe('downloader', () => {
 
     it('should dispatch error if no content-disposition', (done) => {
       let fakeServer = setupFakeServer({ headers: {} });
-      downloader.download({}, '/tv/anime/');
+      downloader.download(createDefaultEpisode());
       eventEmitter.once('subs:download:error', (err) => {
         expect(err).to.be.instanceof(Error)
           .with.property('message').that.string('content-disposition');

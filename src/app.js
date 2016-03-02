@@ -21,20 +21,20 @@ const FOLDER = settings.folder ? settings.folder : '/tv/';
 downloader.setLogger(createLogger('downloader'));
 downloader.setEventEmitter(eventEmitter);
 downloader.setUrl(URL);
-function downloadHandler(event) {
+const downloadHandler = (event) => {
   let series = event.Series;
-  event.Episodes.forEach(function (episode) {
-    downloader.download({
-        tvdbId: series.TvdbId,
-        season: episode.SeasonNumber,
-        episodeNum: episode.EpisodeNumber,
-        releaseGroup: episode.ReleaseGroup,
-        videoFileName: episode.SceneName + '.mp4', // workaround for subs parser
-      },
-      series.Path
-    );
+  event.Episodes.forEach((episode) => {
+    downloader.download(new documents.Episode({
+      tvdbId: series.TvdbId,
+      season: episode.SeasonNumber,
+      episodeNum: episode.EpisodeNumber,
+      releaseGroup: episode.ReleaseGroup,
+      videoFileName: episode.SceneName + '.mp4', // workaround for subs parser
+      seriesPath: series.Path,
+      seriesTitle: series.Title,
+    }));
   });
-}
+};
 
 eventEmitter.on('subs:webhook:request', downloadHandler);
 
@@ -57,14 +57,22 @@ if (settings.notify) {
     ],
     'Subs-Stalker: '
   );
-  eventEmitter.on('subs:download:success', (filePath) => {
-    notifier.notify({ title: 'Subtitle Downloaded', body: filePath.replace(/^\/.*\//, '') });
+  eventEmitter.on('subs:download:success', (episode) => {
+    notifier.notify({ title: 'Subtitle Downloaded', body: episode.subtitleFileName });
   });
   eventEmitter.on('subs:test', (event) => {
     notifier.notify({
       title:'Webhook test',
       body: `Series ${event.Series.Title} - Episode ${event.Episodes[0].EpisodeNumber}`,
     });
+  });
+}
+
+// notify module
+if (settings.wanted) {
+
+  eventEmitter.on('subs:download:error', (episode) => {
+    wanted.add(episode);
   });
 }
 

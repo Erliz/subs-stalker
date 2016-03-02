@@ -7,14 +7,14 @@ let serviceUrl = '';
 let eventEmitter;
 let logger = console;
 
-const buildQuery = (tvdbId, season, episodeNum, releaseGroup, videoFileName) => {
+const buildQuery = ({ tvdbId, seasonNum, episodeNum, releaseGroup, videoFileName }) => {
   validateServiceUrl(serviceUrl);
   return serviceUrl + '?' + querystring.stringify({
-    tvdbId,
-    season,
-    episodeNum,
-    releaseGroup,
-    videoFileName,
+    tvdbId: tvdbId,
+    season: seasonNum,
+    episodeNum: episodeNum,
+    releaseGroup: releaseGroup,
+    videoFileName: videoFileName,
   });
 };
 
@@ -24,27 +24,15 @@ const validateServiceUrl = (url) => {
   }
 };
 
-const getFilePathToWrite = (seriesDir, seasonNum, fileName) => {
-  return `${seriesDir.replace(/\/$/g, '')}/Season ${seasonNum}/${fileName}`;
-};
-
-const download = ({ tvdbId, season = 1, episodeNum, releaseGroup, videoFileName }, baseFolder) => {
-  let query = buildQuery(tvdbId, season, episodeNum, releaseGroup, videoFileName);
+const download = (episode) => {
+  let query = buildQuery(episode);
   request
     .get(query)
     .on('error', err => {
-      handleErrorResponse(err, query);
+      handleErrorResponse(err, episode);
     })
     .on('response', res => {
-      // i don`t know why 40* and 50* code are getting here
-      if (res.statusCode === 200) {
-        let fileName = getFileNameFromResponse(res);
-        if (fileName) {
-          res.pipe(writeFile(getFilePathToWrite(baseFolder, season, fileName)));
-        }
-      } else {
-        handleErrorResponse(Object.assign(new Error(), res), query);
-      }
+      handleResponse(res, episode);
     });
 };
 
@@ -60,17 +48,27 @@ const getFileNameFromResponse = (res) => {
   return contentDisposition.parse(header).parameters.filename;
 };
 
-const handleErrorResponse = (err, query) => {
-  logger.error(`Response ${err.statusCode} with '${err.message}' on ${query}`);
-  dispatch('subs:download:error', err);
+const handleResponse = (res, episode) => {
+  // i don`t know why 40* and 50* code are getting here
+  if (res.statusCode === 200) {
+    let fileName = getFileNameFromResponse(res);
+    if (fileName) {
+      episode.subtitleFileName = fileName;
+      let writeStream = fs.createWriteStream(episode.subtitleFilePath);
+      writeStream.on('close', () => {
+        logger.info(`Download success: ${episode.subtitleFilePath}`);
+        dispatch('subs:download:success', episode);
+      });
+      res.pipe(writeStream);
+    }
+  } else {
+    handleErrorResponse(Object.assign(new Error(), res), episode);
+  }
 };
 
-const writeFile = (to) => {
-  return fs.createWriteStream(to)
-      .on('close', () => {
-        logger.info(`Download success: ${to}`);
-        dispatch('subs:download:success', to);
-      });
+const handleErrorResponse = (err, episode) => {
+  logger.error(`Response ${err.statusCode} with '${err.message}' on ${episode}`);
+  dispatch('subs:download:error', err);
 };
 
 const dispatch = (eventName, event) => {
