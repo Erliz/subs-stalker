@@ -9,7 +9,8 @@ import downloader from './downloader';
 import createLogger from './../src/logger';
 import {Notifier, transports as notifierTransports} from './notifier';
 import PushBullet from 'pushbullet';
-import documents from 'documents';
+import documents from './documents';
+import createWanted from './wanted';
 
 const API_VERSION = 'v0.1';
 const API_KEY = settings.apikey;
@@ -70,10 +71,10 @@ if (settings.notify) {
 
 // notify module
 if (settings.wanted) {
-
-  eventEmitter.on('subs:download:error', (episode) => {
-    wanted.add(episode);
-  });
+  let wanted = createWanted(createLogger('wanted'));
+  eventEmitter.on('subs:download:success', wanted.remove);
+  eventEmitter.on('subs:download:error', wanted.add);
+  wanted.watch(downloader);
 }
 
 //eventEmitter.emit('subs:download', 'Naruto - 087');

@@ -66,7 +66,7 @@ describe('documents', () => {
       });
 
       expect(episode.tvdbId).to.be.equal(1);
-      expect(episode.episodeNum).to.be.equal(1);
+      expect(episode.episodeNum).to.be.a('string').and.equal('1');
       expect(episode.seriesPath).to.be.equal('/tv/anime');
     });
 
@@ -76,12 +76,14 @@ describe('documents', () => {
         episodeNum: 1,
         seriesPath: '/tv/anime',
 
+        id: 1203,
         seasonNum: 1,
         releaseGroup: 'Group Test Name',
         videoFileName: 'Video.mp4',
         seriesTitle: 'Test Title',
       });
 
+      expect(episode.id).to.be.equal(1203);
       expect(episode.seasonNum).to.be.equal(1);
       expect(episode.releaseGroup).to.be.equal('Group Test Name');
       expect(episode.videoFileName).to.be.equal('Video.mp4');

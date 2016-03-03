@@ -1,10 +1,10 @@
 export default class Episode {
   constructor({
+    id = null,
     tvdbId,
     episodeNum,
     seriesPath,
     seasonNum = 1,
-    episodePath = null,
     releaseGroup = null,
     videoFileName = null,
     subtitleFileName = null,
@@ -14,9 +14,10 @@ export default class Episode {
       throw TypeError('To create Episode fields tvdbId, episodeNum, seriesPath should be set');
     }
 
+    this.id = id;
     this.tvdbId = tvdbId;
     this.seasonNum = seasonNum;
-    this.episodeNum = episodeNum;
+    this.episodeNum = episodeNum.toString();
     this.releaseGroup = releaseGroup;
     this.videoFileName = videoFileName;
     this.seriesTitle = seriesTitle;
