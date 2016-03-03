@@ -70,7 +70,7 @@ if (settings.notify) {
 }
 
 // notify module
-if (settings.wanted) {
+if (settings.stalk) {
   let wanted = createWanted(createLogger('wanted'));
   eventEmitter.on('subs:download:success', wanted.remove);
   eventEmitter.on('subs:download:error', wanted.add);

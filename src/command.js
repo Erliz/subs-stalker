@@ -8,6 +8,7 @@ configure
   .option('-f, --folder [value]', 'Folder to watch on series files')
   .option('-n, --notify', 'Notify on downloads')
   .option('-w, --webhook', 'Run webhook listener')
+  .option('--stalk', 'Stalk for wanted subtitles')
   .option('--notifier_apikey [value]', 'PushBullet api on downloads')
   .option('--notifier_devices [value]', 'PushBullet devices ids')
   .parse(process.argv);
