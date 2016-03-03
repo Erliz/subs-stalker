@@ -9,7 +9,7 @@ export default class Episode {
     videoFileName = null,
     subtitleFileName = null,
     seriesTitle = null,
-    }) {
+  }) {
     if (!tvdbId || !episodeNum || !seriesPath) {
       throw TypeError('To create Episode fields tvdbId, episodeNum, seriesPath should be set');
     }

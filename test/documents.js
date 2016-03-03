@@ -1,22 +1,22 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 
-import documents from '../src/documents';
+import { Episode } from '../src/documents';
 
 describe('documents', () => {
   describe('Episode', () => {
     it('should create instance', () => {
-      let episode = new documents.Episode({
+      let episode = new Episode({
         tvdbId: 1,
         episodeNum: 1,
         seriesPath: '/tv/anime/',
       });
-      expect(episode).to.be.instanceof(documents.Episode);
+      expect(episode).to.be.instanceof(Episode);
     });
 
     it('should throw error if tvdbId not set', () => {
       let isCaught = false;
       try {
-        new documents.Episode({
+        new Episode({
           episodeNum: 1,
           seriesPath: '/tv/anime/',
         });
@@ -31,7 +31,7 @@ describe('documents', () => {
     it('should throw error if episodeNum not set', () => {
       let isCaught = false;
       try {
-        new documents.Episode({
+        new Episode({
           tvdbId: 1,
           seriesPath: '/tv/anime/',
         });
@@ -46,7 +46,7 @@ describe('documents', () => {
     it('should throw error if seriesPath not set', () => {
       let isCaught = false;
       try {
-        new documents.Episode({
+        new Episode({
           tvdbId: 1,
           episodeNum: 1,
         });
@@ -59,7 +59,7 @@ describe('documents', () => {
     });
 
     it('should set required properties on construct', () => {
-      let episode = new documents.Episode({
+      let episode = new Episode({
         tvdbId: 1,
         episodeNum: 1,
         seriesPath: '/tv/anime',
@@ -71,7 +71,7 @@ describe('documents', () => {
     });
 
     it('should set additional properties on construct', () => {
-      let episode = new documents.Episode({
+      let episode = new Episode({
         tvdbId: 1,
         episodeNum: 1,
         seriesPath: '/tv/anime',
@@ -91,7 +91,7 @@ describe('documents', () => {
     });
 
     it('should set episode path properties', () => {
-      let episode = new documents.Episode({
+      let episode = new Episode({
         tvdbId: 1,
         episodeNum: 1,
         seriesPath: '/tv/anime',

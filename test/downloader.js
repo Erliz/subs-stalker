@@ -1,14 +1,14 @@
 import sinon from 'sinon';
-import {expect} from 'chai';
+import { expect } from 'chai';
 import nock from 'nock';
 import fsMock from 'mock-fs';
 import querystring from 'querystring';
 
 import fs from 'fs';
-import createLogger from './../src/logger';
-import downloader from './../src/downloader';
-import eventEmitter from './../src/event';
-import documents from './../src/documents';
+import createLogger from '../src/logger';
+import downloader from '../src/downloader';
+import eventEmitter from '../src/event';
+import { Episode } from '../src/documents';
 
 const emptyQuery = { tvdbId: 1, season: 1, episodeNum: 1, releaseGroup: '', videoFileName: '' };
 const defaultResponseText = 'Tone of text';
@@ -17,7 +17,7 @@ const fakeServerUrl = '/api/1001/v1.0/';
 const fakeServerHeader = { 'Content-Disposition': 'attachment; filename="response_file.txt"' };
 
 const createDefaultEpisode = (additional) => {
-  return new documents.Episode(Object.assign({
+  return new Episode(Object.assign({
     tvdbId: 1,
     episodeNum: 1,
     seriesPath: '/tv/anime',

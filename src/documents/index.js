@@ -1,3 +1,3 @@
 import Episode from './Episode';
 
-export default { Episode };
+export { Episode };

@@ -1,5 +1,7 @@
 import sqlite3 from 'sqlite3';
 
+import { Episode } from '../documents';
+
 export default ({ dbLocation = ':memory:', logger = console }, callback) => {
   let db = new sqlite3.Database(dbLocation, callback);
 
@@ -10,9 +12,10 @@ export default ({ dbLocation = ':memory:', logger = console }, callback) => {
   const createTable = (table, callback) => {
     switch (table) {
       case 'wanted':
+
+        // rowid create automatically
         db.run(
           'CREATE TABLE IF NOT EXISTS `wanted` (' +
-          '`id` INT PRIMARY KEY,' +
           '`tvdbId` INT NOT NULL,' +
           '`episodeNum` TEXT NOT NULL,' +
           '`seriesPath` TEXT NOT NULL,' +
@@ -26,7 +29,10 @@ export default ({ dbLocation = ':memory:', logger = console }, callback) => {
         );
         break;
       default:
-        logger.error(`Undefined scheme for table "${table}"`);
+        let errorText = `Undefined scheme for table "${table}"`;
+        logger.error(errorText);
+        callback(new Error(errorText), null);
+        return;
     }
   };
 
@@ -38,30 +44,45 @@ export default ({ dbLocation = ':memory:', logger = console }, callback) => {
   const persist = (table, episode, callback) => {
     db.run(
       'INSERT INTO ' + table + ' ' +
-      '(id, tvdbId, episodeNum, seriesPath, seasonNum, releaseGroup, ' +
+      '(tvdbId, episodeNum, seriesPath, seasonNum, releaseGroup, ' +
       'videoFileName, subtitleFileName, seriesTitle) ' +
       ' VALUES (' + serialize(episode) + ');',
       [],
-      callback);
+      function (err) {
+        if (err) {
+          callback(err, null);
+          return;
+        }
+
+        episode.id = this.lastID;
+        callback(err, episode);
+      }
+    );
   };
 
   // remove episode from db
   const remove = (table, episode, callback) => {
     if (!episode.id) {
       callback(new TypeError('Fail to remove episode without id'), null);
+      return;
     }
 
-    db.run(`DELETE FROM ${table} WHERE id = ?;`, [episode.id], callback);
+    db.run(`DELETE FROM ${table} WHERE rowid = ?;`, [episode.id], callback);
   };
 
   // find all episodes by type
   const findAll = (table, callback) => {
-    db.all(`SELECT * FROM ${table}`, [], callback);
+    db.all(`SELECT rowid as id, * FROM ${table}`, [], (err, list) => {
+      if (err) callback(err, null);
+      let episodes = list.map((row) => {
+        return new Episode(row);
+      });
+      callback(null, episodes);
+    });
   };
 
   const serialize = (episode) => {
     return '"' + [
-        episode.id,
         episode.tvdbId,
         episode.episodeNum,
         episode.seriesPath,

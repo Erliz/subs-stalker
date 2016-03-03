@@ -32,4 +32,4 @@ class Notifier {
     }
 }
 
-export {Notifier, transports};
+export { Notifier, transports };

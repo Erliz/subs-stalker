@@ -1,4 +1,4 @@
-import {Logger, transports} from 'winston';
+import { Logger, transports } from 'winston';
 
 /* istanbul ignore next */
 export default (service = 'app', level = 'info') => {

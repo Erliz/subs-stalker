@@ -1,15 +1,15 @@
 'use strict';
 
-import {format as sprintf} from 'util';
+import { format as sprintf } from 'util';
 import chokidar from 'chokidar';
 import settings from './command';
 import web from './web';
 import eventEmitter from './event';
 import downloader from './downloader';
 import createLogger from './../src/logger';
-import {Notifier, transports as notifierTransports} from './notifier';
+import { Notifier, transports as notifierTransports } from './notifier';
 import PushBullet from 'pushbullet';
-import documents from './documents';
+import { Episode } from './documents';
 import createWanted from './wanted';
 
 const API_VERSION = 'v0.1';
@@ -25,7 +25,7 @@ downloader.setUrl(URL);
 const downloadHandler = (event) => {
   let series = event.Series;
   event.Episodes.forEach((episode) => {
-    downloader.download(new documents.Episode({
+    downloader.download(new Episode({
       tvdbId: series.TvdbId,
       season: episode.SeasonNumber,
       episodeNum: episode.EpisodeNumber,
