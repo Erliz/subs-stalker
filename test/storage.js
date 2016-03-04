@@ -3,9 +3,8 @@ import sinon from 'sinon';
 
 import { Episode } from '../src/documents';
 import createStorage from '../src/storage';
-import createLogger from './../src/logger';
+import createLogger from '../src/logger';
 
-let storage;
 
 const createEpisode = () => {
   return new Episode({
@@ -16,6 +15,9 @@ const createEpisode = () => {
 };
 
 describe('storage', () => {
+
+  let storage;
+
   beforeEach((done) => {
     const handleConnectionSucceed = (err) => {
       if (err) done(err);

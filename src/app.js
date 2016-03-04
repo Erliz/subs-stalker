@@ -11,6 +11,7 @@ import { Notifier, transports as notifierTransports } from './notifier';
 import PushBullet from 'pushbullet';
 import { Episode } from './documents';
 import createWanted from './wanted';
+import path from 'path';
 
 const API_VERSION = 'v0.1';
 const API_KEY = settings.apikey;
@@ -76,7 +77,10 @@ if (settings.stalk) {
     wanted.watch(downloader);
   };
 
-  let wanted = createWanted({ logger: createLogger('wanted') }, handleWantedInitCallback);
+  let wanted = createWanted(
+    { logger: createLogger('wanted'), storagePath: path.join(__dirname, '../config/db.sqlite'),  },
+    handleWantedInitCallback
+  );
   eventEmitter.on('subs:download:success', wanted.remove);
   eventEmitter.on('subs:download:error', ({ err, episode }) => {
     if (episode) {
