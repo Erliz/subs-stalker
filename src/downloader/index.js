@@ -41,7 +41,7 @@ const getFileNameFromResponse = (res) => {
   if (!header) {
     let err = new Error('Response have no "content-disposition" in header');
     logger.error(err.message);
-    dispatch('subs:download:error', err);
+    dispatch('subs:download:error', { err });
     return;
   }
 
@@ -62,13 +62,13 @@ const handleResponse = (res, episode) => {
       res.pipe(writeStream);
     }
   } else {
-    handleErrorResponse(Object.assign(new Error(), res), episode);
+    handleErrorResponse(Object.assign(new Error(res.body), res), episode);
   }
 };
 
 const handleErrorResponse = (err, episode) => {
-  logger.error(`Response ${err.statusCode} with '${err.message}' on ${episode}`);
-  dispatch('subs:download:error', err);
+  logger.error(`Response ${err.statusCode} with '${err.message}' on ${buildQuery(episode)}`);
+  dispatch('subs:download:error', { err, episode });
 };
 
 const dispatch = (eventName, event) => {

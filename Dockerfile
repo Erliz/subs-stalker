@@ -2,10 +2,11 @@ FROM node
 
 MAINTAINER Stanislav Vetlovskiy <mrerliz@gmail.com>
 
-VOLUME ["/tv"]
-
 RUN mkdir /app
 ADD . /app/
+
+VOLUME ["/tv", "/app/config"]
+
 RUN cd /app && npm install --only=prod
 
 EXPOSE 3000

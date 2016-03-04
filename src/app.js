@@ -71,10 +71,20 @@ if (settings.notify) {
 
 // notify module
 if (settings.stalk) {
-  let wanted = createWanted(createLogger('wanted'));
+  const handleWantedInitCallback = (err) => {
+    if (err) throw err;
+    wanted.watch(downloader);
+  };
+
+  let wanted = createWanted({ logger: createLogger('wanted') }, handleWantedInitCallback);
   eventEmitter.on('subs:download:success', wanted.remove);
-  eventEmitter.on('subs:download:error', wanted.add);
-  wanted.watch(downloader);
+  eventEmitter.on('subs:download:error', ({ err, episode }) => {
+    if (episode) {
+      wanted.add(episode);
+    } else {
+      throw err;
+    }
+  });
 }
 
 //eventEmitter.emit('subs:download', 'Naruto - 087');

@@ -1,10 +1,17 @@
+import path from 'path';
 import createStorage from '../storage';
 
-export default ({ logger = console }) => {
+export default ({ logger = console }, callback = () => {}) => {
 
   let storageName = 'wanted';
-  let storagePath = 'config/db.sqlite';
-  let storage = createStorage({ logger, dbLocation: storagePath });
+  let storagePath = path.join(__dirname, '../../config/db.sqlite');
+
+  const  handleInitCallback = (err) => {
+    if (err) throw err;
+    storage.createTable('wanted', callback);
+  };
+
+  let storage = createStorage({ logger, dbLocation: storagePath }, handleInitCallback);
 
   // get all wanted episodes episodes from storage
   const list = (callback) => {
@@ -12,28 +19,36 @@ export default ({ logger = console }) => {
   };
 
   // is episode already in storage
-  const contains = (episode, callback) => {
-    if (!episode.id) {
-      callback(null, false);
-    }
-
+  const contains = (episode, callback = () => {}) => {
     list((err, episodesList) => {
       if (err) callback(err, null);
-      callback(null, episodesList.some(inStorageEpisode => inStorageEpisode.id === episode.id));
+      callback(null, episodesList.some((inStorageEpisode) => {
+        return inStorageEpisode.tvdbId === episode.tvdbId &&
+          inStorageEpisode.episodeNum === episode.episodeNum &&
+          inStorageEpisode.seasonNum === episode.seasonNum;
+      }));
     });
   };
 
   // add episode to storage
-  const add = (episode, callback) => {
+  const add = (episode, callback = () => {}) => {
     contains(episode, (err, isExist) => {
-      if (err) callback(err, null);
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
       if (!isExist) {
         storage.persist(storageName, episode, (err) => {
-          if (err) callback(err, null);
-          callback(null, episode);
+          if (err) {
+            callback(err, null);
+            return;
+          }
+
           logger.info(
             `Added to wanted subtitles for ${episode.seriesTitle} ep ${episode.episodeNum}`
           );
+          callback(null, episode);
         });
       } else {
         logger.info(
@@ -44,16 +59,24 @@ export default ({ logger = console }) => {
   };
 
   // remove episode from storage
-  const remove = (episode, callback) => {
+  const remove = (episode, callback = () => {}) => {
     contains(episode, (err, isExist) => {
-      if (err) callback(err, null);
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
       if (isExist) {
         storage.remove(storageName, episode, (err) => {
-          if (err) callback(err, null);
-          callback(null, episode);
+          if (err) {
+            callback(err, null);
+            return;
+          }
+
           logger.info(
             `Remove from wanted subtitles for ${episode.seriesTitle} ep ${episode.episodeNum}`
           );
+          callback(null, episode);
         });
       } else {
         logger.info(
@@ -67,15 +90,19 @@ export default ({ logger = console }) => {
    * watcher for not downloaded subtitles
    * @param downloader instance
    */
-  const watcher = (downloader) => {
+  const watch = (downloader) => {
     list((err, list) => {
       if (err) throw err;
-      list.forEach((episode) => {
-        downloader.download(episode);
+      logger.info(`Currently wanted ${list.length} subtitles`);
+      list.forEach((episode, i) => {
+        // anti ddos
+        setTimeout(() => {
+          downloader.download(episode);
+        }, i * 10 * 1000);
       });
     });
     setTimeout(() => {
-      watcher(downloader);
+      watch(downloader);
     }, 10 * 60 * 1000);
   };
 
@@ -93,6 +120,7 @@ export default ({ logger = console }) => {
     contains,
     remove,
     list,
+    watch,
     setLogger,
     setStorageName,
   };

@@ -84,8 +84,9 @@ describe('downloader', () => {
     it('should dispatch error on 404', (done) => {
       let fakeServer = setupFakeServer({ code: 404 });
       downloader.download(createDefaultEpisode());
-      eventEmitter.once('subs:download:error', (err) => {
+      eventEmitter.once('subs:download:error', ({ err, episode }) => {
         expect(err).to.be.instanceof(Error).with.property('statusCode').to.be.equal(404);
+        expect(episode).to.be.instanceof(Episode);
         fakeServer.done();
         done();
       });
@@ -94,8 +95,9 @@ describe('downloader', () => {
     it('should dispatch error on bad query', (done) => {
       let fakeServer = setupFakeServer({ query: {} });
       downloader.download(createDefaultEpisode());
-      eventEmitter.once('subs:download:error', (err) => {
+      eventEmitter.once('subs:download:error', ({ err, episode }) => {
         expect(err).to.be.instanceof(Error).with.property('statusCode').to.be.equal(404);
+        expect(episode).to.be.instanceof(Episode);
         done();
       });
     });
@@ -103,7 +105,7 @@ describe('downloader', () => {
     it('should dispatch error if no content-disposition', (done) => {
       let fakeServer = setupFakeServer({ headers: {} });
       downloader.download(createDefaultEpisode());
-      eventEmitter.once('subs:download:error', (err) => {
+      eventEmitter.once('subs:download:error', ({ err }) => {
         expect(err).to.be.instanceof(Error)
           .with.property('message').that.string('content-disposition');
         fakeServer.done();

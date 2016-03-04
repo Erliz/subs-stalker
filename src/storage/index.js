@@ -2,14 +2,14 @@ import sqlite3 from 'sqlite3';
 
 import { Episode } from '../documents';
 
-export default ({ dbLocation = ':memory:', logger = console }, callback) => {
+export default ({ dbLocation = ':memory:', logger = console }, callback = () => {}) => {
   let db = new sqlite3.Database(dbLocation, callback);
 
   db.on('profile', (query, time) => {
-    logger.info(`"${query}" by ${time} sec`);
+    logger.info(`"${query}" by ${time} ms`);
   });
 
-  const createTable = (table, callback) => {
+  const createTable = (table, callback = () => {}) => {
     switch (table) {
       case 'wanted':
 
@@ -32,16 +32,15 @@ export default ({ dbLocation = ':memory:', logger = console }, callback) => {
         let errorText = `Undefined scheme for table "${table}"`;
         logger.error(errorText);
         callback(new Error(errorText), null);
-        return;
     }
   };
 
-  const dropTable = (table, callback) => {
+  const dropTable = (table, callback = () => {}) => {
     db.run(`DROP TABLE ${table}`, callback);
   };
 
   // save episode in db
-  const persist = (table, episode, callback) => {
+  const persist = (table, episode, callback = () => {}) => {
     db.run(
       'INSERT INTO ' + table + ' ' +
       '(tvdbId, episodeNum, seriesPath, seasonNum, releaseGroup, ' +
@@ -61,7 +60,7 @@ export default ({ dbLocation = ':memory:', logger = console }, callback) => {
   };
 
   // remove episode from db
-  const remove = (table, episode, callback) => {
+  const remove = (table, episode, callback = () => {}) => {
     if (!episode.id) {
       callback(new TypeError('Fail to remove episode without id'), null);
       return;
@@ -73,7 +72,11 @@ export default ({ dbLocation = ':memory:', logger = console }, callback) => {
   // find all episodes by type
   const findAll = (table, callback) => {
     db.all(`SELECT rowid as id, * FROM ${table}`, [], (err, list) => {
-      if (err) callback(err, null);
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
       let episodes = list.map((row) => {
         return new Episode(row);
       });
