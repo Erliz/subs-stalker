@@ -27,7 +27,7 @@ const downloadHandler = (event) => {
   event.Episodes.forEach((episode) => {
     downloader.download(new Episode({
       tvdbId: series.TvdbId,
-      season: episode.SeasonNumber,
+      seasonNum: episode.SeasonNumber,
       episodeNum: episode.EpisodeNumber,
       releaseGroup: episode.ReleaseGroup,
       videoFileName: episode.SceneName + '.mp4', // workaround for subs parser
