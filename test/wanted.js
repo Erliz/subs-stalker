@@ -4,11 +4,12 @@ import sinon from 'sinon';
 import { Episode } from '../src/documents';
 import createWanted from '../src/wanted';
 import createLogger from '../src/logger';
+import createStorage from '../src/storage';
 
 describe('Wanted', () => {
 
   let wanted;
-  let logger = createLogger('wanted', error);
+  let logger = createLogger('wanted', 'error');
 
   const createEpisode = () => {
     return new Episode({
@@ -94,9 +95,14 @@ describe('Wanted', () => {
     });
   });
 
-  describe('destroy', () => {
-    it('should once call callback', (done) => {
-      done(new Error('Not implemented'));
+  describe.only('destroy', () => {
+    it('should call storage close method', (done) => {
+      let cb = (err) => done(err);
+      let cbSpy = sinon.spy(cb);
+      let storage = createStorage({});
+      console.log(storage);
+      storageSpy = sinon.spy(Object.getPrototypeOf(storage));
+      wanted.destroy(cb);
     });
   });
 });
