@@ -97,14 +97,6 @@ export default ({ dbLocation = ':memory:', logger = console }, callback = () => 
       ].join('","') + '"';
   };
 
-  const setLogger = (logService) => {
-    logger = logService;
-  };
-
-  const setDbLocation = (path) => {
-    dbLocation = path;
-  };
-
   const close = (callback) => {
     db.close(callback);
   };
@@ -115,8 +107,6 @@ export default ({ dbLocation = ':memory:', logger = console }, callback = () => 
     remove,
     createTable,
     dropTable,
-    setLogger,
-    setDbLocation,
     close,
   };
 };

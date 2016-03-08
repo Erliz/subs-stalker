@@ -3,9 +3,8 @@ import sinon from 'sinon';
 
 import { Episode } from '../src/documents';
 import createStorage from '../src/storage';
-import createLogger from './../src/logger';
+import createLogger from '../src/logger';
 
-let storage;
 
 const createEpisode = () => {
   return new Episode({
@@ -16,6 +15,9 @@ const createEpisode = () => {
 };
 
 describe('storage', () => {
+
+  let storage;
+
   beforeEach((done) => {
     const handleConnectionSucceed = (err) => {
       if (err) done(err);
@@ -37,14 +39,6 @@ describe('storage', () => {
     createStorage({}, (err) => {
       done(err);
     });
-  });
-
-  it('should set logger', () => {
-    storage.setLogger(createLogger('storage', 'info'));
-  });
-
-  it('should set db location', () => {
-    storage.setDbLocation(':memory:');
   });
 
   it('should call callback with error on bad table name argument', (done) => {
