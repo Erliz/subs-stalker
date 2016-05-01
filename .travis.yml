@@ -4,11 +4,13 @@ cache:
   directories:
     - node_modules
 node_js:
-  - "stable"
-  - "6.0.0"
-  - "5.11.0"
-  - "4.4.3"
-  - "0.12.13"
+  - 6
+  - 5.11.0
+  - 4.4.3
+  - 0.12.13
+matrix:
+  allow_failures:
+    - node_js: 6
 script:
   - npm run test:single
   - npm run check-coverage
