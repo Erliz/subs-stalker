@@ -134,7 +134,7 @@ describe('webhook server', function () {
 
   it('should response not found', (done) => {
     superagent
-      .get(defaultTestUrl)
+      .get(`${defaultTestUrl}404`)
       .end((error, res) => {
         assert.equal(error.message, 'Not Found');
         assert.equal(res.status, 404);

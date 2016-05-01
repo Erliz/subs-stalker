@@ -84,6 +84,10 @@ if (settings.stalk) {
     },
     handleWantedInitCallback
   );
+  if (settings.webhook) {
+    web.setStorage(wanted);
+  }
+
   eventEmitter.on('subs:download:success', wanted.remove);
   eventEmitter.on('subs:download:error', ({ err, episode }) => {
     if (episode) {

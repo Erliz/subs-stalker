@@ -129,5 +129,6 @@ export default (
     remove,
     watch,
     destroy,
+    list,
   };
 };
