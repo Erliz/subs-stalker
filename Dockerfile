@@ -1,4 +1,4 @@
-FROM node
+FROM node:5
 
 MAINTAINER Stanislav Vetlovskiy <mrerliz@gmail.com>
 
