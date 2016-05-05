@@ -2,8 +2,8 @@
   "name": "subs-stalker",
   "version": "0.3.0",
   "description": "Watch for video files and download subtitles",
-  "main": "src/index.js",
   "scripts": {
+    "start": "node src/index.js -w --stalk",
     "test": "mocha test/index.js --compilers js:babel-core/register -w",
     "test:single": "babel-node node_modules/mocha/bin/_mocha test/index.js",
     "check-coverage": "babel-node node_modules/babel-istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha",
@@ -41,12 +41,18 @@
   "devDependencies": {
     "babel-cli": "6.7.7",
     "babel-istanbul": "0.8.0",
+    "babel-loader": "6.2.4",
+    "babel-preset-react": "6.5.0",
+    "babel-preset-stage-0": "6.5.0",
     "chai": "3.5.0",
     "codecov": "1.0.1",
     "mocha": "2.4.5",
     "mock-fs": "3.9.0",
     "nock": "8.0.0",
+    "react": "15.0.2",
+    "react-dom": "15.0.2",
     "sinon": "1.17.3",
-    "superagent": "1.8.3"
+    "superagent": "1.8.3",
+    "webpack": "1.13.0"
   }
 }

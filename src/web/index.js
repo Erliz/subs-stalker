@@ -11,6 +11,36 @@ http.use(bodyParser.json());
 http.use(bodyParser.urlencoded({ extended: true }));
 
 http.get('/', function (req, res) {
+  res.sendFile(__dirname + '/resources/layout.html');
+});
+
+http.get('/static/*', function (req, res) {
+  if(!req.params[0]) {
+    res.sendStatus(404);
+    return;
+  }
+  let fileName = req.params[0];
+  let rootDir = __dirname + '/resources/';
+  let options = {
+    root: rootDir,
+    dotfiles: 'deny',
+    headers: {
+      'x-timestamp': Date.now(),
+      'x-sent': true
+    }
+  };
+  res.sendFile(fileName, options, function (err) {
+    if (err) {
+      console.log(err);
+      res.status(err.status).end();
+    }
+    else {
+      console.log('Sent:', fileName);
+    }
+  });
+});
+
+http.get('/list/', function (req, res) {
   getList()
     .then((data) => {
       res.send(data);
