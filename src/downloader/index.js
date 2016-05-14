@@ -54,12 +54,19 @@ const handleResponse = (res, episode) => {
     let fileName = getFileNameFromResponse(res);
     if (fileName) {
       episode.subtitleFileName = fileName;
-      let writeStream = fs.createWriteStream(episode.subtitleFilePath);
-      writeStream.on('close', () => {
-        logger.info(`Download success: ${episode.subtitleFilePath}`);
-        dispatch('subs:download:success', episode);
+      fs.access(episode.subtitleFileName, fs.F_OK, function(err) {
+        if (err) {
+          logger.error(err.message);
+          dispatch('subs:download:error', { err, episode });
+          return;
+        }
+        let writeStream = fs.createWriteStream(episode.subtitleFilePath);
+        writeStream.on('close', () => {
+          logger.info(`Download success: ${episode.subtitleFilePath}`);
+          dispatch('subs:download:success', episode);
+        });
+        res.pipe(writeStream);
       });
-      res.pipe(writeStream);
     }
   } else {
     handleErrorResponse(Object.assign(new Error(res.body), res), episode);
