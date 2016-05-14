@@ -27,6 +27,6 @@ export default class Episode {
 
   get subtitleFilePath() {
     return `${this.seriesPath.replace(/\/$/g, '')}/Season ${
-      this.seasonNum}/${this.subtitleFileName}`;
+      this.seasonNum}/${this.subtitleFileName || ''}`;
   }
 }

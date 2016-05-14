@@ -53,13 +53,14 @@ const handleResponse = (res, episode) => {
   if (res.statusCode === 200) {
     let fileName = getFileNameFromResponse(res);
     if (fileName) {
-      episode.subtitleFileName = fileName;
-      fs.access(episode.subtitleFileName, fs.F_OK, function(err) {
+      fs.access(episode.subtitleFilePath, fs.F_OK, function(err) {
         if (err) {
+          console.log(err);
           logger.error(err.message);
           dispatch('subs:download:error', { err, episode });
           return;
         }
+        episode.subtitleFileName = fileName;
         let writeStream = fs.createWriteStream(episode.subtitleFilePath);
         writeStream.on('close', () => {
           logger.info(`Download success: ${episode.subtitleFilePath}`);
