@@ -29,6 +29,9 @@ const Episode = React.createClass({
           {this.props.data.id}
         </td>
         <td>
+          {this.props.data.releaseGroup}
+        </td>
+        <td>
           {this.props.data.seriesTitle}
         </td>
         <td>
@@ -58,6 +61,9 @@ const EpisodesList = React.createClass({
         <tr>
           <td>
             #
+          </td>
+          <td>
+            Release Group
           </td>
           <td>
             Title
