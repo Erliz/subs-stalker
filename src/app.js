@@ -1,7 +1,6 @@
 'use strict';
 
 import { format as sprintf } from 'util';
-import chokidar from 'chokidar';
 import settings from './command';
 import web from './web';
 import eventEmitter from './event';
@@ -17,7 +16,6 @@ const API_VERSION = 'v0.1';
 const API_KEY = settings.apikey;
 const URL_TEMPLATE = 'http://subs.erliz.ru/api/%s/%s/subtitle/get/';
 const URL = sprintf(URL_TEMPLATE, API_VERSION, API_KEY);
-const FOLDER = settings.folder ? settings.folder : '/tv/';
 
 // download module
 downloader.setLogger(createLogger('downloader'));

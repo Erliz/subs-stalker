@@ -103,7 +103,10 @@ export default (
       list.forEach((episode, i) => {
         // anti ddos
         tasks.push(setTimeout(() => {
-          downloader.download(episode);
+          // check if episode not removed from storage
+          if (contains(episode)) {
+            downloader.download(episode);
+          }
         }, i * timeout * 1000));
       });
     });

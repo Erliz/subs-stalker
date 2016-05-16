@@ -84,6 +84,20 @@ export default ({ dbLocation = ':memory:', logger = console }, callback = () => 
     });
   };
 
+  const find = (id, table, callback) => {
+    db.all(`SELECT rowid as id, * FROM ${table} WHERE rowid = ${id}`, [], (err, list) => {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      let episodes = list.map((row) => {
+        return new Episode(row);
+      });
+      callback(null, episodes);
+    });
+  };
+
   const serialize = (episode) => {
     return '"' + [
         episode.tvdbId,
@@ -103,6 +117,7 @@ export default ({ dbLocation = ':memory:', logger = console }, callback = () => 
 
   return {
     findAll,
+    find,
     persist,
     remove,
     createTable,
