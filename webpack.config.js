@@ -1,11 +1,7 @@
 'use strict';
-var path = require('path');
 var webpack = require('webpack');
 var _ = require('lodash');
 var args = require('minimist')(process.argv.slice(2));
-
-// List of allowed environments
-var allowedEnvs = ['dev', 'dist', 'test'];
 
 // Set the correct environment
 var env;

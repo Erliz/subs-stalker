@@ -104,9 +104,11 @@ export default (
         // anti ddos
         tasks.push(setTimeout(() => {
           // check if episode not removed from storage
-          if (contains(episode)) {
-            downloader.download(episode);
-          }
+          contains(episode, (err, isContains) => {
+            if (isContains) {
+              downloader.download(episode);
+            }
+          });
         }, i * timeout * 1000));
       });
     });

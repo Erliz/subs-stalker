@@ -1,7 +1,6 @@
 import request from 'request';
 import querystring from 'querystring';
 import contentDisposition from 'content-disposition';
-import url from 'url';
 import fs from 'fs';
 let serviceUrl = '';
 let eventEmitter;
@@ -27,12 +26,13 @@ const validateServiceUrl = (url) => {
 const download = (episode) => {
   let query = buildQuery(episode);
   request
-    .get(query)
-    .on('error', err => {
-      handleErrorResponse(err, episode);
-    })
-    .on('response', res => {
-      handleResponse(res, episode);
+    .get(query, (err, res, body) => {
+      if (err) {
+        handleErrorResponse(err, episode);
+        return;
+      }
+
+      handleResponse(res, body, episode);
     });
 };
 
@@ -48,14 +48,13 @@ const getFileNameFromResponse = (res) => {
   return contentDisposition.parse(header).parameters.filename;
 };
 
-const handleResponse = (res, episode) => {
+const handleResponse = (res, body, episode) => {
   // i don`t know why 40* and 50* code are getting here
   if (res.statusCode === 200) {
     let fileName = getFileNameFromResponse(res);
     if (fileName) {
       fs.access(episode.subtitleFilePath, fs.F_OK, function(err) {
         if (err) {
-          console.log(err);
           logger.error(err.message);
           dispatch('subs:download:error', { err, episode });
           return;
