@@ -65,7 +65,8 @@ const handleResponse = (res, body, episode) => {
           logger.info(`Download success: ${episode.subtitleFilePath}`);
           dispatch('subs:download:success', episode);
         });
-        res.pipe(writeStream);
+        writeStream.write(body);
+        writeStream.end();
       });
     }
   } else {
